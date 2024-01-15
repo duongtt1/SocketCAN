@@ -1,0 +1,52 @@
+/* Auto-generated file - DO NOT EDIT */
+#ifndef CNF_CLASS_CAN_H
+#define CNF_CLASS_CAN_H
+
+#include <stdint.h>
+#include "Common.h"
+
+{% for message in messages %}
+class {{ message.name }}_OBJ
+{
+private:
+{% for signal in message.signals %}
+{% if signal.length <= 8 %}
+    {% if signal.is_signed %}
+    CAN_DATA<int8_t> {{ signal.name }};
+    {% else %}
+    CAN_DATA<uint8_t> {{ signal.name }};
+    {% endif %}
+{% elif signal.length <= 16 %}
+    {% if signal.is_signed %}
+    CAN_DATA<int16_t> {{ signal.name }};
+    {% else %}
+    CAN_DATA<uint16_t> {{ signal.name }};
+    {% endif %}
+{% elif signal.length <= 32 %}
+    {% if signal.is_signed %}
+    CAN_DATA<int32_t> {{ signal.name }};
+    {% else %}
+    CAN_DATA<uint32_t> {{ signal.name }};
+    {% endif %}
+{% else %}
+    {% if signal.is_signed %}
+    CAN_DATA<int64_t> {{ signal.name }};
+    {% else %}
+    CAN_DATA<uint64_t> {{ signal.name }};
+    {% endif %}
+{% endif %}
+{% endfor %}
+public:
+{% if message.is_transmitter %}
+    void Pack_{{message.name}}_{{message.cycle_time}}_Pack(const uint8_t* frame) {
+    }
+    
+{% else %}
+    void Unpack_{{message.name}}_{{message.cycle_time}}_Pack(const uint8_t* frame) {
+    }
+{% endif %}
+};
+
+{% endfor %}
+
+#endif
