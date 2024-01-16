@@ -6,12 +6,12 @@
 #include "Common.h"
 
 {% for message in messages %}
-#define MSG_{{ message.name }} 0x{{ message.frame_id }}
+#define {{ message.name }}_ID 0x{{ message.frame_id }}
 {% endfor %}
 
 uint32_t u32CAN_ID_Receive_Filter[] = {
 {% for message in messages %}
-    MSG_{{ message.name }},
+    {{ message.name }}_ID,
 {% endfor %}
 };
 

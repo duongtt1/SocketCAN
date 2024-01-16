@@ -24,9 +24,9 @@ enum eCAN_STATUS
 template <typename T>
 struct CAN_DATA
 {
-    T u8Value;
-    bool bUpdated;
-    eCAN_STATUS eStatus;
+    T value;
+    bool updated;
+    eCAN_STATUS status;
 };
 
 #include <cstdint>
@@ -35,7 +35,7 @@ struct CAN_DATA
 
 class CanFrame {
 public:
-    CanFrame(canid_t canId, const int8_t* data, uint8_t dataSize) : frame{} {
+    CanFrame(canid_t canId, const uint8_t* data, uint8_t dataSize) : frame{} {
         if (dataSize > CANFD_MAX_DLEN) {
             throw std::invalid_argument("DLC exceeds maximum allowed value");
         }
@@ -56,5 +56,7 @@ public:
 private:
     struct can_frame frame;
 };
+
+
 
 #endif

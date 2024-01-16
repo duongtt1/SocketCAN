@@ -2,12 +2,6 @@
 #include "CanSocket.h"
 #include <iostream>
 
-CanSocket CanSocket::getInstance(const char *interfaceName)
-{
-    CanSocket instance(interfaceName);
-    return instance;
-}
-
 CanSocket::CanSocket(const char *interfaceName)
 {
     socketDescriptor = socket(PF_CAN, SOCK_RAW, CAN_RAW);
@@ -24,6 +18,10 @@ CanSocket::CanSocket(const char *interfaceName)
     addr.can_family = AF_CAN;
     addr.can_ifindex = ifr.ifr_ifindex;
 
+    // Set socket option for CAN FD
+    int enable_canfd = 1;
+    setsockopt(socketDescriptor, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd, sizeof(enable_canfd));
+
     if (bind(socketDescriptor, reinterpret_cast<struct sockaddr *>(&addr), sizeof(addr)) < 0)
     {
         perror("Bind");
@@ -38,7 +36,7 @@ CanSocket::~CanSocket()
 
 void CanSocket::sendCanFrame(const CanFrame &canFrame)
 {
-    if (write(socketDescriptor, &canFrame.getFrame(), sizeof(can_frame)) != sizeof(can_frame))
+    if (write(socketDescriptor, &canFrame.getFrame(), sizeof(canfd_frame)) != sizeof(canfd_frame))
     {
         perror("Write");
         throw std::runtime_error("Failed to write to the CAN socket");
@@ -47,12 +45,12 @@ void CanSocket::sendCanFrame(const CanFrame &canFrame)
 
 CanFrame CanSocket::receiveCanFrame()
 {
-    struct can_frame frame;
-    ssize_t bytesRead = read(socketDescriptor, &frame, sizeof(can_frame));
+    struct canfd_frame frame;
+    ssize_t bytesRead = read(socketDescriptor, &frame, sizeof(canfd_frame));
 
-    if (bytesRead == sizeof(can_frame))
+    if (bytesRead == sizeof(canfd_frame))
     {
-        return CanFrame(frame.can_id, reinterpret_cast<int8_t *>(frame.data), frame.can_dlc);
+        return CanFrame(frame.can_id, reinterpret_cast<uint8_t *>(frame.data), frame.len);
     }
     else
     {

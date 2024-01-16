@@ -12,8 +12,6 @@
 class CanSocket
 {
 public:
-    CanSocket getInstance(const char *interfaceName);
-
     ~CanSocket();
 
     void sendCanFrame(const CanFrame &canFrame);

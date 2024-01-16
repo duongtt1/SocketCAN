@@ -3,6 +3,8 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 import os
 import json
 
+generate_can_ids: [64, 66, 67, 68, 1154]
+
 # Load DBC file
 db = cantools.database.load_file('./hyundai_kia_generic.dbc')
 
@@ -11,7 +13,7 @@ with open('./conf.json') as config_file:
     config = json.load(config_file)
 
 # Filter CAN IDs based on configuration
-filtered_messages = [msg for msg in db.messages if msg.frame_id in config['generate_can_ids']]
+filtered_messages = [msg for msg in db.messages if msg.frame_id in generate_can_ids]
 
 # Jinja environment setup
 env = Environment(
@@ -30,7 +32,7 @@ context = {
 }
 
 # Render the template and write to a C file
-output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../Common/CNF_CLASS_CAN.h')
+output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../Common/CNF_CAN.h')
 with open(output_path, 'w') as file:
     file.write(template.render(context))
 

@@ -6,45 +6,80 @@
 #include "Common.h"
 
 {% for message in messages %}
-class {{ message.name }}_OBJ
+#define {{ message.name }}_ID 0x{{ message.frame_id }}
+{% endfor %}
+
+uint32_t u32CAN_ID_Receive_Filter[] = {
+{% for message in messages %}
+    {{ message.name }}_ID,
+{% endfor %}
+};
+
+template <typename T>
+T extractSignalValue(const uint8_t* frame, uint8_t startBit, uint8_t endBit) {
+    // Ensure valid start and end bit positions
+    if (startBit < 0 || endBit >= 64 || startBit > endBit) {
+        std::cerr << "Invalid start or end bit positions." << std::endl;
+        return 0;  // Return 0 as an error value
+    }
+
+    // Calculate the number of bits to extract
+    int8_t numBits = endBit - startBit + 1;
+
+    // Initialize the extracted value to zero
+    T extractedValue = 0;
+
+    // Extract the bits from the CAN frame data
+    for (int8_t i = startBit; i <= endBit; ++i) {
+        int8_t byteIndex = i / 8;
+        int8_t bitIndex = i % 8;
+
+        // Extract the bit and update the extracted value
+        extractedValue |= ((frame[byteIndex] >> bitIndex) & 0x01) << (i - startBit);
+    }
+
+    return extractedValue;
+}
+
+{% for message in messages %}
+class {{ message.name }}
 {
 private:
 {% for signal in message.signals %}
-{% if signal.length <= 8 %}
-    {% if signal.is_signed %}
-    CAN_DATA<int8_t> {{ signal.name }};
+    {% if signal.length <= 8 %}
+        {% if signal.is_signed %}
+        CAN_DATA<int8_t> {{ signal.name }};
+        {% else %}
+        CAN_DATA<uint8_t> {{ signal.name }};
+        {% endif %}
+    {% elif signal.length <= 16 %}
+        {% if signal.is_signed %}
+        CAN_DATA<int16_t> {{ signal.name }};uint8_t
+        {% else %}
+        CAN_DATA<uint16_t> {{ signal.name }};
+        {% endif %}
+    {% elif signal.length <= 32 %}
+        {% if signal.is_signed %}
+        CAN_DATA<int32_t> {{ signal.name }};
+        {% else %}
+        CAN_DATA<uint32_t> {{ signal.name }};
+        {% endif %}
     {% else %}
-    CAN_DATA<uint8_t> {{ signal.name }};
+        {% if signal.is_signed %}
+        CAN_DATA<int64_t> {{ signal.name }};
+        {% else %}
+        CAN_DATA<uint64_t> {{ signal.name }};
+        {% endif %}
     {% endif %}
-{% elif signal.length <= 16 %}
-    {% if signal.is_signed %}
-    CAN_DATA<int16_t> {{ signal.name }};
-    {% else %}
-    CAN_DATA<uint16_t> {{ signal.name }};
-    {% endif %}
-{% elif signal.length <= 32 %}
-    {% if signal.is_signed %}
-    CAN_DATA<int32_t> {{ signal.name }};
-    {% else %}
-    CAN_DATA<uint32_t> {{ signal.name }};
-    {% endif %}
-{% else %}
-    {% if signal.is_signed %}
-    CAN_DATA<int64_t> {{ signal.name }};
-    {% else %}
-    CAN_DATA<uint64_t> {{ signal.name }};
-    {% endif %}
-{% endif %}
 {% endfor %}
+    uint32_t id;
+    uint8_t dataSize;
 public:
-{% if message.is_transmitter %}
-    void Pack_{{message.name}}_{{message.cycle_time}}_Pack(const uint8_t* frame) {
+    void Unpack_{{message.name}}(const uint8_t* frame) {
+        {% for signal in message.signals %}
+            {{ signal.name }}.value = static_cast<decltype({{ signal.name }}.value)>(extractSignalValue<decltype({{ signal.name }}.value)>(frame, (uint8_t){{ signal.start }}, (uint8_t){{ signal.start + signal.length - 1 }}));
+        {% endfor %}
     }
-    
-{% else %}
-    void Unpack_{{message.name}}_{{message.cycle_time}}_Pack(const uint8_t* frame) {
-    }
-{% endif %}
 };
 
 {% endfor %}
