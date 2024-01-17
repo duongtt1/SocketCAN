@@ -20,8 +20,6 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/local/share/cmake-3.20/Modules/CMakeSystemSpecificInformation.cmake"
   "/usr/local/share/cmake-3.20/Modules/CMakeSystemSpecificInitialize.cmake"
   "/usr/local/share/cmake-3.20/Modules/CheckCSourceCompiles.cmake"
-  "/usr/local/share/cmake-3.20/Modules/CheckForPthreads.c"
-  "/usr/local/share/cmake-3.20/Modules/CheckIncludeFile.c.in"
   "/usr/local/share/cmake-3.20/Modules/CheckIncludeFile.cmake"
   "/usr/local/share/cmake-3.20/Modules/CheckLibraryExists.cmake"
   "/usr/local/share/cmake-3.20/Modules/Compiler/CMakeCommonCompilerMacros.cmake"

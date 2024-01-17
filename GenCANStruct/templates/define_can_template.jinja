@@ -1,0 +1,116 @@
+/* Auto-generated file - DO NOT EDIT */
+#ifndef CNF_CLASS_CAN_H
+#define CNF_CLASS_CAN_H
+
+#include <stdint.h>
+#include <memory>
+#include <iostream>
+
+#include "../CanDB.h"
+#include "Common.h"
+
+{% for message in messages %}
+#define {{ message.name }}_ID 0x{{ message.frame_id }}
+{% endfor %}
+
+uint32_t u32CAN_ID_Receive_Filter[] = {
+{% for message in messages %}
+    {{ message.name }}_ID,
+{% endfor %}
+};
+
+
+{% for message in messages %}
+struct {{ message.name }}_SIGNALS
+{
+{% for signal in message.signals %}
+{% if signal.length <= 8 %}
+    {% if signal.is_signed %}
+    CAN_DATA<int8_t> {{ signal.name }};
+    {% else %}
+    CAN_DATA<uint8_t> {{ signal.name }};
+    {% endif %}
+{% elif signal.length <= 16 %}
+    {% if signal.is_signed %}
+    CAN_DATA<int16_t> {{ signal.name }};uint8_t
+    {% else %}
+    CAN_DATA<uint16_t> {{ signal.name }};
+    {% endif %}
+{% elif signal.length <= 32 %}
+    {% if signal.is_signed %}
+    CAN_DATA<int32_t> {{ signal.name }};
+    {% else %}
+    CAN_DATA<uint32_t> {{ signal.name }};
+    {% endif %}
+{% else %}
+    {% if signal.is_signed %}
+    CAN_DATA<int64_t> {{ signal.name }};
+    {% else %}
+    CAN_DATA<uint64_t> {{ signal.name }};
+    {% endif %}
+{% endif %}
+{% endfor %}
+};
+
+class {{ message.name }}_MSG : public ICAN_MSG
+{
+    {{ message.name }}_SIGNALS  signals; 
+public:
+    {{ message.name }}_MSG()
+    {
+        this->id            = {{ message.frame_id }};
+        this->dlc           = {{ message.length }};
+        this->periodTimeMs  = 200;  
+        this->status        = CAN_STATUS::eCS_Unknown;
+        this->timeoutMs     = 200 * 5;      
+        this->updated       = false;
+    }
+
+    ~{{ message.name }}_MSG(){
+
+    }
+
+
+    void unpack(const uint8_t* frame) override {
+        {% for signal in message.signals %}
+            signals.{{ signal.name }}.value = extractSignalValue<decltype(signals.{{ signal.name }}.value)>(frame, (uint8_t){{ signal.start }}, (uint8_t){{ signal.start + signal.length - 1 }});
+        {% endfor %}
+    }
+
+    CanFrame pack() override
+    {
+        // Create a buffer to hold the combined data
+        uint8_t combinedData[CANFD_MAX_DLEN] = {0};  // Assuming MAX_DATA_SIZE is a static constant in CanFrame
+
+        // Copy all properties to the combined buffer
+        uint8_t* buffer = combinedData;
+        copyPropertiesToBuffer(buffer, {% for signal in message.signals %} signals.{{ signal.name }} {% if not loop.last  %}, {% endif %} {% endfor %} );
+
+        // Create a CanFrame instance with the combined data
+        CanFrame combinedFrame(this->id, combinedData, CANFD_MAX_DLEN);
+
+        return combinedFrame;
+    }
+
+    canid_t getCanId()
+    {
+        return this->id;
+    }
+};
+
+{% endfor %}
+
+void initRx()
+{
+{% for message in messages %}
+    std::shared_ptr<{{ message.name }}_MSG> {{ message.name }}_OBJ = std::make_shared<{{ message.name }}_MSG>();
+    CanDB::getInstance().setCanMsgRx({{ message.name }}_OBJ->getCanId(), {{ message.name }}_OBJ);
+{% endfor %}
+}
+
+void initTx()
+{
+
+}
+
+#endif

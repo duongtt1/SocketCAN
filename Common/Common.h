@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <cstring>
-#include <stdexcept>
 #include <memory>
 #include <unistd.h>
 #include <net/if.h>
@@ -12,8 +11,11 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 #include <vector>
+#include <cstdint>
+#include <stdexcept>
+#include <algorithm>
 
-enum eCAN_STATUS
+enum CAN_STATUS
 {
     eCS_Unknown = 0,
     eCS_Normal,
@@ -26,12 +28,46 @@ struct CAN_DATA
 {
     T value;
     bool updated;
-    eCAN_STATUS status;
 };
 
-#include <cstdint>
-#include <stdexcept>
-#include <algorithm>
+template <typename T>
+T extractSignalValue(const uint8_t* frame, uint8_t startBit, uint8_t endBit) {
+    // Ensure valid start and end bit positions
+    if (startBit < 0 || endBit >= 64 || startBit > endBit) {
+        std::cerr << "Invalid start or end bit positions." << std::endl;
+        return 0;  // Return 0 as an error value
+    }
+
+    // Calculate the number of bits to extract
+    int8_t numBits = endBit - startBit + 1;
+
+    // Initialize the extracted value to zero
+    T extractedValue = 0;
+
+    // Extract the bits from the CAN frame data
+    for (int8_t i = startBit; i <= endBit; ++i) {
+        int8_t byteIndex = i / 8;
+        int8_t bitIndex = i % 8;
+
+        // Extract the bit and update the extracted value
+        extractedValue |= ((frame[byteIndex] >> bitIndex) & 0x01) << (i - startBit);
+    }
+
+    return extractedValue;
+}
+
+// Define a helper function to copy a property to a buffer
+template <typename T>
+void copyPropertyToBuffer(const T& property, uint8_t*& buffer) {
+    std::memcpy(buffer, &property, sizeof(property));
+    buffer += sizeof(property);
+}
+
+// Recursive function to copy all properties to the buffer
+template <typename... Properties>
+void copyPropertiesToBuffer(uint8_t*& buffer, const Properties&... properties) {
+    (copyPropertyToBuffer(properties, buffer), ...);
+}
 
 class CanFrame {
 public:
@@ -57,6 +93,18 @@ private:
     struct can_frame frame;
 };
 
-
+class ICAN_MSG 
+{
+protected:
+    canid_t     id;
+    uint16_t    periodTimeMs;
+    bool        updated;
+    uint16_t    timeoutMs;
+    uint8_t     dlc;
+    CAN_STATUS status;
+public:
+    virtual CanFrame pack() = 0;
+    virtual void unpack(const uint8_t* frame) = 0; 
+};
 
 #endif

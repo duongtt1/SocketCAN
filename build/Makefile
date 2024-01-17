@@ -129,6 +129,30 @@ SocketCAN/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SocketCAN.dir/build.make CMakeFiles/SocketCAN.dir/build
 .PHONY : SocketCAN/fast
 
+CanDB.o: CanDB.cpp.o
+.PHONY : CanDB.o
+
+# target to build an object file
+CanDB.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SocketCAN.dir/build.make CMakeFiles/SocketCAN.dir/CanDB.cpp.o
+.PHONY : CanDB.cpp.o
+
+CanDB.i: CanDB.cpp.i
+.PHONY : CanDB.i
+
+# target to preprocess a source file
+CanDB.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SocketCAN.dir/build.make CMakeFiles/SocketCAN.dir/CanDB.cpp.i
+.PHONY : CanDB.cpp.i
+
+CanDB.s: CanDB.cpp.s
+.PHONY : CanDB.s
+
+# target to generate assembly for a file
+CanDB.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SocketCAN.dir/build.make CMakeFiles/SocketCAN.dir/CanDB.cpp.s
+.PHONY : CanDB.cpp.s
+
 CanSocket.o: CanSocket.cpp.o
 .PHONY : CanSocket.o
 
@@ -186,6 +210,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... SocketCAN"
+	@echo "... CanDB.o"
+	@echo "... CanDB.i"
+	@echo "... CanDB.s"
 	@echo "... CanSocket.o"
 	@echo "... CanSocket.i"
 	@echo "... CanSocket.s"

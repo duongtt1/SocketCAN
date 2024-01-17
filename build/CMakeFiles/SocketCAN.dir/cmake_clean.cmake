@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/SocketCAN.dir/CanDB.cpp.o"
+  "CMakeFiles/SocketCAN.dir/CanDB.cpp.o.d"
   "CMakeFiles/SocketCAN.dir/CanSocket.cpp.o"
   "CMakeFiles/SocketCAN.dir/CanSocket.cpp.o.d"
   "CMakeFiles/SocketCAN.dir/main.cpp.o"

@@ -27,35 +27,69 @@ CanSocket::CanSocket(const char *interfaceName)
         perror("Bind");
         throw std::runtime_error("Failed to bind CAN socket");
     }
+
+    // Start the receive thread with a default interval of 100ms
+    receiveThread = std::thread(&CanSocket::receiveLoop, this, std::chrono::milliseconds(100));
 }
 
 CanSocket::~CanSocket()
 {
+    stopThreads = true;
+    if (receiveThread.joinable())
+        receiveThread.join();
+    if (sendThread.joinable())
+        sendThread.join();
+
     close(socketDescriptor);
 }
 
 void CanSocket::sendCanFrame(const CanFrame &canFrame)
 {
-    if (write(socketDescriptor, &canFrame.getFrame(), sizeof(canfd_frame)) != sizeof(canfd_frame))
+    // if (write(socketDescriptor, &canFrame.getData(), canFrame.getLength()) != canFrame.getLength())
+    // {
+    //     perror("Write");
+    //     throw std::runtime_error("Failed to write to the CAN socket");
+    // }
+}
+
+void CanSocket::receiveCanFramesPeriodically(std::chrono::milliseconds interval)
+{
+    // Start the receive thread with the specified interval
+    receiveThread = std::thread(&CanSocket::receiveLoop, this, interval);
+}
+
+void CanSocket::receiveLoop(std::chrono::milliseconds interval)
+{
+    while (!stopThreads)
     {
-        perror("Write");
-        throw std::runtime_error("Failed to write to the CAN socket");
+        // CanFrame receivedFrame = receiveCanFrame();
+
+        // // Store the received frame in CanDB for other threads to read
+        // CanDB::getInstance().setCanMsgRx(receivedFrame.getCanId(), std::make_shared<ICAN_MSG>(receivedFrame));
+
+        // std::this_thread::sleep_for(interval);
     }
 }
 
-CanFrame CanSocket::receiveCanFrame()
+void CanSocket::sendCanFramesPeriodically(std::chrono::milliseconds interval)
 {
-    struct canfd_frame frame;
-    ssize_t bytesRead = read(socketDescriptor, &frame, sizeof(canfd_frame));
+    // Start the send thread with the specified interval
+    sendThread = std::thread(&CanSocket::sendLoop, this, interval); 
+}
 
-    if (bytesRead == sizeof(canfd_frame))
+void CanSocket::sendLoop(std::chrono::milliseconds interval)
+{
+    while (!stopThreads)
     {
-        return CanFrame(frame.can_id, reinterpret_cast<uint8_t *>(frame.data), frame.len);
-    }
-    else
-    {
-        perror("Read");
-        throw std::runtime_error("Failed to read from the CAN socket");
+        // Retrieve a CanFrame from CanDB for sending
+        // std::shared_ptr<ICAN_MSG> msg = CanDB::getInstance().getCanMsgTx(/* specify CAN ID */);
+        // if (msg)
+        // {
+        //     CanFrame frame = msg->pack();
+        //     sendCanFrame(frame);
+        // }
+
+        std::this_thread::sleep_for(interval);
     }
 }
 
