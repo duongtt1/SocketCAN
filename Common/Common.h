@@ -14,6 +14,9 @@
 #include <cstdint>
 #include <stdexcept>
 #include <algorithm>
+#include <chrono>
+
+using namespace std::chrono;
 
 enum CAN_STATUS
 {
@@ -101,10 +104,22 @@ protected:
     bool        updated;
     uint16_t    timeoutMs;
     uint8_t     dlc;
-    CAN_STATUS status;
+    CAN_STATUS  status;
+    steady_clock::time_point lastActivated;
 public:
     virtual CanFrame pack() = 0;
     virtual void unpack(const uint8_t* frame) = 0; 
+
+    steady_clock::time_point getLastActivated() {
+        return lastActivated;
+    }
+    steady_clock::time_point setLastActivated(steady_clock::time_point newTime) {
+        lastActivated = newTime;
+    }
+
+    uint16_t getPeriodTime(){
+        return periodTimeMs;
+    }
 };
 
 #endif

@@ -6,7 +6,7 @@ import json
 generate_can_ids= [64, 66, 67, 68, 1154]
 
 # Load DBC file
-db = cantools.database.load_file('./hyundai_kia_generic.dbc')
+db = cantools.database.load_file('./dbc/hyundai_kia_generic.dbc')
 
 
 # Filter CAN IDs based on configuration

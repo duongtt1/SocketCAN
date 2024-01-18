@@ -1,3 +1,0 @@
-/home/duoq/workplace/SocketCAN/build/CMakeFiles/rebuild_cache.dir
-/home/duoq/workplace/SocketCAN/build/CMakeFiles/SocketCAN.dir
-/home/duoq/workplace/SocketCAN/build/CMakeFiles/edit_cache.dir

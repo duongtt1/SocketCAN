@@ -7,6 +7,7 @@
 #include <memory>
 #include <mutex>
 
+using namespace std::chrono;
 class CanDB
 {
 private:
@@ -18,6 +19,10 @@ private:
     CanDB(/* args */) {}
 
 public:
+
+    std::map<canid_t, steady_clock::time_point>  periodTimeToSendMsg;
+    std::map<canid_t, steady_clock::time_point>  periodTimeToRecvMsg;
+
     ~CanDB() {}
 
     static CanDB& getInstance();
@@ -35,6 +40,13 @@ public:
     uint16_t getNumberOfMsgRx() const;
     uint16_t getNumberOfMsgTx() const;
 
+    std::map<canid_t, std::shared_ptr<ICAN_MSG>> getDbTX(){
+        return dbTx;
+    }
+
+    std::map<canid_t, std::shared_ptr<ICAN_MSG>> getDbRX(){
+        return dbRx;
+    }
 
 
 };

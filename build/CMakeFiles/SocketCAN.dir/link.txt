@@ -1,1 +1,0 @@
-/usr/bin/c++ -rdynamic CMakeFiles/SocketCAN.dir/CanDB.cpp.o CMakeFiles/SocketCAN.dir/CanSocket.cpp.o CMakeFiles/SocketCAN.dir/main.cpp.o -o SocketCAN  -pthread 

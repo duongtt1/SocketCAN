@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <memory>
 #include <iostream>
+#include <chrono>
+#include <limits> 
 
 #include "../CanDB.h"
 #include "Common.h"
@@ -44,6 +46,7 @@ public:
         this->status        = CAN_STATUS::eCS_Unknown;
         this->timeoutMs     = 200 * 5;      
         this->updated       = false;
+        this->lastActivated = std::chrono::steady_clock::time_point::min();
     }
 
     ~DATC11_MSG(){
@@ -121,6 +124,7 @@ public:
         this->status        = CAN_STATUS::eCS_Unknown;
         this->timeoutMs     = 200 * 5;      
         this->updated       = false;
+        this->lastActivated = std::chrono::steady_clock::time_point::min();
     }
 
     ~DATC13_MSG(){
@@ -199,6 +203,7 @@ public:
         this->status        = CAN_STATUS::eCS_Unknown;
         this->timeoutMs     = 200 * 5;      
         this->updated       = false;
+        this->lastActivated = std::chrono::steady_clock::time_point::min();
     }
 
     ~DATC12_MSG(){
@@ -262,6 +267,7 @@ public:
         this->status        = CAN_STATUS::eCS_Unknown;
         this->timeoutMs     = 200 * 5;      
         this->updated       = false;
+        this->lastActivated = std::chrono::steady_clock::time_point::min();
     }
 
     ~DATC14_MSG(){

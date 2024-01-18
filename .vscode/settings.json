@@ -54,6 +54,11 @@
         "map": "cpp",
         "set": "cpp",
         "cinttypes": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "csignal": "cpp",
+        "codecvt": "cpp",
+        "future": "cpp",
+        "iomanip": "cpp",
+        "*.ipp": "cpp"
     }
 }
