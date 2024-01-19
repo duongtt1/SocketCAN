@@ -13,7 +13,7 @@
 #include <chrono>
 #include <atomic>
 #include "Common/SafeQueue.h"
-
+#include "CacheRecv.h"
 class CanSocket
 {
 public:
@@ -23,6 +23,8 @@ public:
     bool sendCanMsgByID(const canid_t id);
     bool sendCandPeriodly();
     bool receiveCanMsg();
+    void startRecv();
+    void stopRecv();
 
 private:
     int socketDescriptor;
@@ -30,6 +32,8 @@ private:
     struct ifreq ifr;
     std::atomic<bool> runSend;
     std::atomic<bool> runRecv;
+    std::shared_ptr<CacheRecv> cacheMem;
+    CacheThread tCache;
 };
 
 #endif // CAN_SOCKET_H

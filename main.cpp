@@ -13,6 +13,8 @@
 int main() {
     initRx();
     CanSocket canSck("vcan0");
-
+    canSck.receiveCanMsg();
+    canSck.startRecv();
+    
     return 0;
 }

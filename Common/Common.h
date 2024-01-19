@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <chrono>
+#include <iomanip>
 
 using namespace std::chrono;
 
@@ -58,6 +59,8 @@ T extractSignalValue(const uint8_t* frame, uint8_t startBit, uint8_t endBit) {
 
     return extractedValue;
 }
+
+
 
 // Define a helper function to copy a property to a buffer
 template <typename T>

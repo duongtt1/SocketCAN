@@ -36,6 +36,11 @@ public:
         return dataQueue.empty();
     }
 
+    bool fully() const {
+        std::unique_lock<std::mutex> lock(queueMutex);
+        return dataQueue.size() == maxSize;
+    }
+
     size_t size() const {
         std::unique_lock<std::mutex> lock(queueMutex);
         return dataQueue.size();

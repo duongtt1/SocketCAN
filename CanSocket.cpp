@@ -1,6 +1,10 @@
 // CanSocket.cpp
 #include "CanSocket.h"
 #include <iostream>
+#include "CacheRecv.h"
+#include <iomanip>
+
+
 
 CanSocket::CanSocket(const char *interfaceName)
 {
@@ -23,6 +27,18 @@ CanSocket::CanSocket(const char *interfaceName)
         perror("Bind");
         throw std::runtime_error("Failed to bind CAN socket");
     }
+
+    int enable_canfd = 1; // Enable CAN FD support
+
+    // Set socket options to enable CAN FD
+    if (setsockopt(socketDescriptor, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfd, sizeof(enable_canfd)) < 0) {
+        perror("setsockopt");
+        throw std::runtime_error("Failed to enable CAN FD support");
+    }
+
+    cacheMem = std::make_shared<CacheRecv>();
+    this->tCache.setCacheMemory(cacheMem);
+    
 }
 
 CanSocket::~CanSocket()
@@ -89,11 +105,11 @@ bool CanSocket::sendCandPeriodly()
 bool CanSocket::receiveCanMsg()
 {
     struct can_frame receivedFrame;
-
+    tCache.start();
     while(runRecv.load())
     {
         ssize_t bytesRead = read(socketDescriptor, &receivedFrame, sizeof(can_frame));
-
+        
         if (bytesRead < 0)
         {
             perror("Read");
@@ -102,11 +118,20 @@ bool CanSocket::receiveCanMsg()
         }
         else if (bytesRead == sizeof(can_frame))
         {
-            // Handle the received CAN frame
-            // ...
-
-            return true; // Successfully received
+            cacheMem->addFrame(receivedFrame);
+            // displayCanFrame(receivedFrame);
+            memset(&receivedFrame, 0, sizeof(receivedFrame));
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
+
     return false;
+}
+
+void CanSocket::startRecv(){
+    runRecv.store(true);
+}
+
+void CanSocket::stopRecv(){
+    runRecv.store(false);
 }
