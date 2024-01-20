@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <chrono>
 #include <iomanip>
+#include <ctime>
+#include <sstream>
 
 using namespace std::chrono;
 
@@ -60,7 +62,7 @@ T extractSignalValue(const uint8_t* frame, uint8_t startBit, uint8_t endBit) {
     return extractedValue;
 }
 
-
+std::string timePointToString(const std::chrono::steady_clock::time_point& timePoint);
 
 // Define a helper function to copy a property to a buffer
 template <typename T>
@@ -75,15 +77,42 @@ void copyPropertiesToBuffer(uint8_t*& buffer, const Properties&... properties) {
     (copyPropertyToBuffer(properties, buffer), ...);
 }
 
+// class CanFrame {
+// public:
+//     CanFrame(canid_t canId, const uint8_t* data, uint8_t dataSize) : frame() {
+//         if (dataSize > CANFD_MAX_DLEN) {
+//             throw std::invalid_argument("DLC exceeds maximum allowed value");
+//         }
+
+//         frame.can_id = canId;
+//         frame.can_dlc = dataSize;
+
+//         if (dataSize > 0) {
+//             // Copying data to __u8 array
+//             std::copy(data, data + dataSize, frame.data);
+//         }
+//     }
+
+//     const struct can_frame& getFrame() const {
+//         return frame;
+//     }
+
+// private:
+//     struct can_frame frame;
+// };
+
+#include <linux/can.h>
+#include <linux/can/raw.h>
+
 class CanFrame {
 public:
-    CanFrame(canid_t canId, const uint8_t* data, uint8_t dataSize) : frame{} {
+    CanFrame(canid_t canId, const uint8_t* data, uint8_t dataSize) : frame() {
         if (dataSize > CANFD_MAX_DLEN) {
             throw std::invalid_argument("DLC exceeds maximum allowed value");
         }
 
         frame.can_id = canId;
-        frame.can_dlc = dataSize;
+        frame.len = dataSize;  // For CAN FD, use 'len' instead of 'can_dlc'
 
         if (dataSize > 0) {
             // Copying data to __u8 array
@@ -91,13 +120,15 @@ public:
         }
     }
 
-    const struct can_frame& getFrame() const {
+    const struct canfd_frame& getFrame() const {
         return frame;
     }
 
 private:
-    struct can_frame frame;
+    struct canfd_frame frame;
 };
+
+
 
 class ICAN_MSG 
 {

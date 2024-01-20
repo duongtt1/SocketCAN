@@ -61,7 +61,14 @@ public:
             signals.CR_Datc_OutTempC.value = extractSignalValue<decltype(signals.CR_Datc_OutTempC.value)>(frame, (uint8_t)24, (uint8_t)31);
             signals.CR_Datc_OutTempF.value = extractSignalValue<decltype(signals.CR_Datc_OutTempF.value)>(frame, (uint8_t)32, (uint8_t)39);
             signals.CF_Datc_IncarTemp.value = extractSignalValue<decltype(signals.CF_Datc_IncarTemp.value)>(frame, (uint8_t)40, (uint8_t)47);
+
+            std::cout << "signals.CF_Datc_Type: " << (uint32_t)signals.CF_Datc_Type.value << "\n";
+            std::cout << "signals.CF_Datc_VerMaj: " << (uint32_t)signals.CF_Datc_VerMaj.value << "\n";
+            std::cout << "signals.CF_Datc_VerMin: " << (uint32_t)signals.CF_Datc_VerMin.value << "\n";
+            std::cout << "signals.CR_Datc_OutTempC: " << (uint32_t)signals.CR_Datc_OutTempC.value << "\n";
+            std::cout << "signals.CF_Datc_IncarTemp: " << (uint32_t)signals.CF_Datc_IncarTemp.value << "\n";
     }
+    
 
     CanFrame pack() override
     {
@@ -267,7 +274,7 @@ public:
         this->status        = CAN_STATUS::eCS_Unknown;
         this->timeoutMs     = 200 * 5;      
         this->updated       = false;
-        this->lastActivated = std::chrono::steady_clock::time_point::min();
+        this->lastActivated = std::chrono::steady_clock::now();
     }
 
     ~DATC14_MSG(){
@@ -317,13 +324,12 @@ void initRx()
     CanDB::getInstance().setCanMsgRx(DATC13_OBJ->getCanId(), DATC13_OBJ);
     std::shared_ptr<DATC12_MSG> DATC12_OBJ = std::make_shared<DATC12_MSG>();
     CanDB::getInstance().setCanMsgRx(DATC12_OBJ->getCanId(), DATC12_OBJ);
-    std::shared_ptr<DATC14_MSG> DATC14_OBJ = std::make_shared<DATC14_MSG>();
-    CanDB::getInstance().setCanMsgRx(DATC14_OBJ->getCanId(), DATC14_OBJ);
 }
 
 void initTx()
 {
-
+    std::shared_ptr<DATC14_MSG> DATC14_OBJ = std::make_shared<DATC14_MSG>();
+    CanDB::getInstance().setCanMsgTx(DATC14_OBJ->getCanId(), DATC14_OBJ);
 }
 
 #endif

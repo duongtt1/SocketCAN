@@ -43,6 +43,8 @@ CanSocket::CanSocket(const char *interfaceName)
 
 CanSocket::~CanSocket()
 {
+    stopRecvThread();
+    stopSendThread();
     close(socketDescriptor);
 }
 
@@ -67,37 +69,53 @@ void CanSocket::setFilter(const canid_t *canIds, size_t numIds)
     }
 }
 
-bool CanSocket::sendCanMsgByID(const canid_t id)
-{
-    auto dbRx = CanDB::getInstance().getDbTX(); // Assuming dbRx is a reference
+bool CanSocket::sendCanMsgByID(const canid_t id) {
+    auto dbRx = CanDB::getInstance().getDbTX();
     auto it = dbRx.find(id);
+
     if (it != dbRx.end()) {
-        CanFrame frame = it->second->pack(); // Convert ICAN_MSG to CanFrame
-        if (write(socketDescriptor, &frame.getFrame(), sizeof(can_frame)) != sizeof(can_frame))
-        {
+        CanFrame frame = it->second->pack();
+
+        // Check if socketDescriptor is valid
+        if (socketDescriptor < 0) {
+            std::cerr << "Invalid socket descriptor" << std::endl;
+            return false;
+        }
+
+        if (write(socketDescriptor, &frame.getFrame(), CANFD_MTU) != CANFD_MTU) {
             perror("Write");
+            std::cerr << "Error writing to CAN socket. Errno: " << errno << std::endl;
             throw std::runtime_error("Failed to write to the CAN socket");
         }
+        
         it->second->setLastActivated(std::chrono::steady_clock::now());
         return true; // Successfully sent
     }
+
     return false;
 }
+
+
+
 
 bool CanSocket::sendCandPeriodly()
 {
     std::chrono::steady_clock::time_point now;
     auto dbRx = CanDB::getInstance().getDbTX();
+
     while (runSend.load())
     {
         now = steady_clock::now();
         for (auto it = dbRx.begin(); it != dbRx.end(); ++it) { 
             auto delay = now - it->second->getLastActivated();
             auto periodTimeMsg = std::chrono::duration<uint16_t>(it->second->getPeriodTime());
-            if ( delay > periodTimeMsg){
+
+            if (delay > std::chrono::microseconds(periodTimeMsg.count())){
                 sendCanMsgByID(it->first);
+            }else{
             }
-        } 
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
     }
     return false;
 }
@@ -119,7 +137,6 @@ bool CanSocket::receiveCanMsg()
         else if (bytesRead == sizeof(can_frame))
         {
             cacheMem->addFrame(receivedFrame);
-            // displayCanFrame(receivedFrame);
             memset(&receivedFrame, 0, sizeof(receivedFrame));
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -128,10 +145,26 @@ bool CanSocket::receiveCanMsg()
     return false;
 }
 
-void CanSocket::startRecv(){
-    runRecv.store(true);
+void CanSocket::startSendThread() {
+        std::cout << "Start sending... \n";
+        sendThread = std::thread(&CanSocket::sendCandPeriodly, this);
+    }
+
+void CanSocket::startRecvThread() {
+    recvThread = std::thread(&CanSocket::receiveCanMsg, this);
+    std::cout << "end start recv \n";
 }
 
-void CanSocket::stopRecv(){
+void CanSocket::stopSendThread() {
+    runSend.store(false);
+    if (sendThread.joinable()) {
+        sendThread.join();
+    }
+}
+
+void CanSocket::stopRecvThread() {
     runRecv.store(false);
+    if (recvThread.joinable()) {
+        recvThread.join();
+    }
 }

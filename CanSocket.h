@@ -23,17 +23,20 @@ public:
     bool sendCanMsgByID(const canid_t id);
     bool sendCandPeriodly();
     bool receiveCanMsg();
-    void startRecv();
-    void stopRecv();
-
+    void startSendThread();
+    void startRecvThread();
+    void stopSendThread();
+    void stopRecvThread();
 private:
     int socketDescriptor;
     struct sockaddr_can addr;
     struct ifreq ifr;
-    std::atomic<bool> runSend;
-    std::atomic<bool> runRecv;
     std::shared_ptr<CacheRecv> cacheMem;
     CacheThread tCache;
+    std::thread sendThread;
+    std::thread recvThread;
+    std::atomic<bool> runSend{true};
+    std::atomic<bool> runRecv{true};
 };
 
 #endif // CAN_SOCKET_H
