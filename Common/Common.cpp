@@ -20,3 +20,34 @@ std::string timePointToString(const std::chrono::steady_clock::time_point& timeP
 
     return oss.str();
 }
+
+void displayCanFrame(const can_frame& frame) {
+    // Print interface name (e.g., vcan0)
+    std::cout << "vcan0 ";
+
+    // Print CAN ID
+    std::cout << std::hex << std::setw(3) << std::setfill('0') << frame.can_id << " ";
+
+    std::cout << "[" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(frame.can_dlc) << "] ";
+
+    // Print data bytes
+    for (int i = 0; i < frame.can_dlc; ++i) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(frame.data[i]) << " ";
+    }
+
+    // Reset to decimal for the next output
+    std::cout << std::dec << std::endl;
+}
+
+std::chrono::steady_clock::time_point ICAN_MSG::getLastActivated() {
+    return lastActivated;
+}
+
+std::chrono::steady_clock::time_point ICAN_MSG::setLastActivated(steady_clock::time_point newTime) {
+    lastActivated = newTime;
+    return lastActivated;
+}
+
+uint16_t ICAN_MSG::getPeriodTime() {
+    return periodTimeMs;
+}

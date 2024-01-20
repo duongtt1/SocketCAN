@@ -16,13 +16,7 @@
 #define DATC12_ID 0x66
 #define DATC14_ID 0x64
 
-uint32_t u32CAN_ID_Receive_Filter[] = {
-    DATC11_ID,
-    DATC13_ID,
-    DATC12_ID,
-    DATC14_ID,
-};
-
+#define ARR_MSG_FILTER {  DATC11_ID ,  DATC13_ID ,  DATC12_ID ,  DATC14_ID   }
 
 struct DATC11_SIGNALS
 {
@@ -42,11 +36,10 @@ public:
     {
         this->id            = 68;
         this->dlc           = 8;
-        this->periodTimeMs  = 200;  
+        this->periodTimeMs  = 100;  
         this->status        = CAN_STATUS::eCS_Unknown;
-        this->timeoutMs     = 200 * 5;      
-        this->updated       = false;
-        this->lastActivated = std::chrono::steady_clock::time_point::min();
+        this->timeoutMs     = this->periodTimeMs * 5;      
+        this->lastActivated = std::chrono::steady_clock::now();
     }
 
     ~DATC11_MSG(){
@@ -61,25 +54,14 @@ public:
             signals.CR_Datc_OutTempC.value = extractSignalValue<decltype(signals.CR_Datc_OutTempC.value)>(frame, (uint8_t)24, (uint8_t)31);
             signals.CR_Datc_OutTempF.value = extractSignalValue<decltype(signals.CR_Datc_OutTempF.value)>(frame, (uint8_t)32, (uint8_t)39);
             signals.CF_Datc_IncarTemp.value = extractSignalValue<decltype(signals.CF_Datc_IncarTemp.value)>(frame, (uint8_t)40, (uint8_t)47);
-
-            std::cout << "signals.CF_Datc_Type: " << (uint32_t)signals.CF_Datc_Type.value << "\n";
-            std::cout << "signals.CF_Datc_VerMaj: " << (uint32_t)signals.CF_Datc_VerMaj.value << "\n";
-            std::cout << "signals.CF_Datc_VerMin: " << (uint32_t)signals.CF_Datc_VerMin.value << "\n";
-            std::cout << "signals.CR_Datc_OutTempC: " << (uint32_t)signals.CR_Datc_OutTempC.value << "\n";
-            std::cout << "signals.CF_Datc_IncarTemp: " << (uint32_t)signals.CF_Datc_IncarTemp.value << "\n";
     }
-    
 
     CanFrame pack() override
     {
-        // Create a buffer to hold the combined data
         uint8_t combinedData[CANFD_MAX_DLEN] = {0};  // Assuming MAX_DATA_SIZE is a static constant in CanFrame
 
-        // Copy all properties to the combined buffer
         uint8_t* buffer = combinedData;
         copyPropertiesToBuffer(buffer,  signals.CF_Datc_Type ,   signals.CF_Datc_VerMaj ,   signals.CF_Datc_VerMin ,   signals.CR_Datc_OutTempC ,   signals.CR_Datc_OutTempF ,   signals.CF_Datc_IncarTemp   );
-
-        // Create a CanFrame instance with the combined data
         CanFrame combinedFrame(this->id, combinedData, CANFD_MAX_DLEN);
 
         return combinedFrame;
@@ -127,11 +109,10 @@ public:
     {
         this->id            = 67;
         this->dlc           = 8;
-        this->periodTimeMs  = 200;  
+        this->periodTimeMs  = 100;  
         this->status        = CAN_STATUS::eCS_Unknown;
-        this->timeoutMs     = 200 * 5;      
-        this->updated       = false;
-        this->lastActivated = std::chrono::steady_clock::time_point::min();
+        this->timeoutMs     = this->periodTimeMs * 5;      
+        this->lastActivated = std::chrono::steady_clock::now();
     }
 
     ~DATC13_MSG(){
@@ -168,14 +149,10 @@ public:
 
     CanFrame pack() override
     {
-        // Create a buffer to hold the combined data
         uint8_t combinedData[CANFD_MAX_DLEN] = {0};  // Assuming MAX_DATA_SIZE is a static constant in CanFrame
 
-        // Copy all properties to the combined buffer
         uint8_t* buffer = combinedData;
         copyPropertiesToBuffer(buffer,  signals.CF_Datc_TempDispUnit ,   signals.CF_Datc_ModDisp ,   signals.CF_Datc_IonClean ,   signals.CF_Datc_ChgReqDisp ,   signals.CF_Datc_IntakeDisp ,   signals.CF_Datc_AutoDisp ,   signals.CF_Datc_FrDefLed ,   signals.CF_Datc_AutoDefogBlink ,   signals.CF_Datc_ClmScanDisp ,   signals.CF_Datc_AqsDisp ,   signals.CF_Datc_AcDisp ,   signals.CF_Datc_OpSts ,   signals.CF_Mtc_MaxAcDisp ,   signals.CF_Datc_DualDisp ,   signals.CF_Datc_PwrInf ,   signals.CF_Datc_RearManual ,   signals.CF_Datc_RearAutoDisp ,   signals.CF_Datc_RearOffDisp ,   signals.CF_Datc_RearClimateScnDisp ,   signals.CF_Datc_RearChgReqDisp ,   signals.CF_Datc_RearModDisp ,   signals.CF_Datc_RearBlwDisp ,   signals.CF_Datc_PSModDisp ,   signals.CF_Datc_FrontBlwDisp   );
-
-        // Create a CanFrame instance with the combined data
         CanFrame combinedFrame(this->id, combinedData, CANFD_MAX_DLEN);
 
         return combinedFrame;
@@ -206,11 +183,10 @@ public:
     {
         this->id            = 66;
         this->dlc           = 8;
-        this->periodTimeMs  = 200;  
+        this->periodTimeMs  = 100;  
         this->status        = CAN_STATUS::eCS_Unknown;
-        this->timeoutMs     = 200 * 5;      
-        this->updated       = false;
-        this->lastActivated = std::chrono::steady_clock::time_point::min();
+        this->timeoutMs     = this->periodTimeMs * 5;      
+        this->lastActivated = std::chrono::steady_clock::now();
     }
 
     ~DATC12_MSG(){
@@ -230,14 +206,10 @@ public:
 
     CanFrame pack() override
     {
-        // Create a buffer to hold the combined data
         uint8_t combinedData[CANFD_MAX_DLEN] = {0};  // Assuming MAX_DATA_SIZE is a static constant in CanFrame
 
-        // Copy all properties to the combined buffer
         uint8_t* buffer = combinedData;
         copyPropertiesToBuffer(buffer,  signals.CR_Datc_DrTempDispC ,   signals.CR_Datc_DrTempDispF ,   signals.CR_Datc_PsTempDispC ,   signals.CR_Datc_PsTempDispF ,   signals.CR_Datc_RearDrTempDispC ,   signals.CR_Datc_RearDrTempDispF ,   signals.CF_Datc_CO2_Warning   );
-
-        // Create a CanFrame instance with the combined data
         CanFrame combinedFrame(this->id, combinedData, CANFD_MAX_DLEN);
 
         return combinedFrame;
@@ -270,10 +242,9 @@ public:
     {
         this->id            = 64;
         this->dlc           = 8;
-        this->periodTimeMs  = 200;  
+        this->periodTimeMs  = 100;  
         this->status        = CAN_STATUS::eCS_Unknown;
-        this->timeoutMs     = 200 * 5;      
-        this->updated       = false;
+        this->timeoutMs     = this->periodTimeMs * 5;      
         this->lastActivated = std::chrono::steady_clock::now();
     }
 
@@ -296,14 +267,10 @@ public:
 
     CanFrame pack() override
     {
-        // Create a buffer to hold the combined data
         uint8_t combinedData[CANFD_MAX_DLEN] = {0};  // Assuming MAX_DATA_SIZE is a static constant in CanFrame
 
-        // Copy all properties to the combined buffer
         uint8_t* buffer = combinedData;
         copyPropertiesToBuffer(buffer,  signals.CF_Datc_AqsLevelOut ,   signals.CF_Datc_DiagMode ,   signals.CR_Datc_SelfDiagCode ,   signals.DATC_SyncDisp ,   signals.DATC_OffDisp ,   signals.DATC_SmartVentDisp ,   signals.DATC_SmartVentOnOffStatus ,   signals.DATC_AutoDefogSysOff_Disp ,   signals.DATC_ADSDisp   );
-
-        // Create a CanFrame instance with the combined data
         CanFrame combinedFrame(this->id, combinedData, CANFD_MAX_DLEN);
 
         return combinedFrame;
@@ -316,20 +283,38 @@ public:
 };
 
 
-void initRx()
+class CFGCAN
 {
-    std::shared_ptr<DATC11_MSG> DATC11_OBJ = std::make_shared<DATC11_MSG>();
-    CanDB::getInstance().setCanMsgRx(DATC11_OBJ->getCanId(), DATC11_OBJ);
-    std::shared_ptr<DATC13_MSG> DATC13_OBJ = std::make_shared<DATC13_MSG>();
-    CanDB::getInstance().setCanMsgRx(DATC13_OBJ->getCanId(), DATC13_OBJ);
-    std::shared_ptr<DATC12_MSG> DATC12_OBJ = std::make_shared<DATC12_MSG>();
-    CanDB::getInstance().setCanMsgRx(DATC12_OBJ->getCanId(), DATC12_OBJ);
-}
+private:
+    CFGCAN() {}  
 
-void initTx()
-{
-    std::shared_ptr<DATC14_MSG> DATC14_OBJ = std::make_shared<DATC14_MSG>();
-    CanDB::getInstance().setCanMsgTx(DATC14_OBJ->getCanId(), DATC14_OBJ);
-}
+public:
+    static CFGCAN& getInstance()
+    {
+        static CFGCAN instance;  
+        return instance;
+    }
+
+    void initRx()
+    {
+            std::shared_ptr<DATC11_MSG> DATC11_OBJ = std::make_shared<DATC11_MSG>();
+            CanDB::getInstance().setRxCanMessage(DATC11_OBJ->getCanId(), DATC11_OBJ);
+            std::shared_ptr<DATC13_MSG> DATC13_OBJ = std::make_shared<DATC13_MSG>();
+            CanDB::getInstance().setRxCanMessage(DATC13_OBJ->getCanId(), DATC13_OBJ);
+            std::shared_ptr<DATC12_MSG> DATC12_OBJ = std::make_shared<DATC12_MSG>();
+            CanDB::getInstance().setRxCanMessage(DATC12_OBJ->getCanId(), DATC12_OBJ);
+            std::shared_ptr<DATC14_MSG> DATC14_OBJ = std::make_shared<DATC14_MSG>();
+            CanDB::getInstance().setRxCanMessage(DATC14_OBJ->getCanId(), DATC14_OBJ);
+    }
+
+    void initTx()
+    {
+        // Your existing code for initTx
+    }
+
+    CFGCAN(const CFGCAN&) = delete;  // Delete copy constructor
+    void operator=(const CFGCAN&) = delete;  // Delete assignment operator
+    ~CFGCAN() {}
+};
 
 #endif

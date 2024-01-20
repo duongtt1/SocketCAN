@@ -11,12 +11,10 @@
 #include "CanSocket.h"
 
 int main() {
-    initRx();
-    initTx();
     CanSocket canSck("vcan0");
     canSck.startRecvThread();
     canSck.startSendThread();
-    
+
     while (1)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
